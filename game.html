@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dino Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #game-wrapper {
+      background-color: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      position: relative; 
+    }
+
+    #game-container {
+      position: relative;
+      width: 600px;
+      height: 200px;
+      border: 1px solid #ccc;
+      overflow: hidden;
+      background-image: url('background.jpg');
+      background-size: cover;
+    }
+
+    #dino {
+      position: absolute;
+      bottom: 0;
+      left: 50px;
+      width: 50px;
+      height: 50px;
+      background-image: url('PG.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+
+    #obstacle {
+      position: absolute;
+      bottom: 0;
+      left: 600px;
+      width: 20px;
+      height: 50px;
+      background-image: url('ENEMY.png');
+      background-size: contain;
+    }
+
+    #game-over {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      color: red;
+    }
+
+    #restart-btn {
+      display: none;
+      position: absolute;
+      top: 60%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    #game-overlay img {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-wrapper">
+    <div id="game-container">
+      <div id="game-overlay">
+        <img src="SuperPlane64.png" alt="Your Image">
+      </div>
+      <div id="dino"></div>
+      <div id="obstacle"></div>
+      <div id="game-over">Game Over</div>
+      <button id="restart-btn" onclick="restartGame()">Ricomincia</button>
+    </div>
+  </div>
+
+  <script>
+    const dino = document.getElementById('dino');
+    const obstacle = document.getElementById('obstacle');
+    const gameOver = document.getElementById('game-over');
+    const restartBtn = document.getElementById('restart-btn');
+    let isJumping = false;
+    let isGameOver = false;
+    let obstacleAnimation;
+    let obstacleSpeed = 4; // Velocità iniziale dell'ostacolo
+
+    document.addEventListener('keydown', (event) => {
+      if (event.code === 'Space' && !isJumping && !isGameOver) {
+        isJumping = true;
+        jump();
+      }
+    });
+
+    function jump() {
+      let position = 0;
+      const jumpInterval = setInterval(() => {
+        if (position >= 100) {
+          clearInterval(jumpInterval);
+          const fallInterval = setInterval(() => {
+            if (position === 0) {
+              clearInterval(fallInterval);
+              isJumping = false;
+            }
+            position -= 5;
+            dino.style.bottom = position + 'px';
+          }, 20);
+        }
+        position += 5;
+        dino.style.bottom = position + 'px';
+      }, 20);
+    }
+
+    function startGame() {
+      obstacleAnimation = requestAnimationFrame(moveObstacle);
+    }
+
+    function moveObstacle() {
+      if (!isGameOver) {
+        const obstacleLeft = parseInt(window.getComputedStyle(obstacle).getPropertyValue('left'));
+        if (obstacleLeft <= -20) {
+          obstacle.style.left = '600px';
+        } else {
+          obstacle.style.left = obstacleLeft - obstacleSpeed + 'px';
+        }
+        if (obstacleLeft > 0 && obstacleLeft < 60 && parseInt(window.getComputedStyle(dino).getPropertyValue('bottom')) <= 50) {
+          // Collision detected
+          isGameOver = true;
+          gameOver.style.display = 'block';
+          restartBtn.style.display = 'block';
+          cancelAnimationFrame(obstacleAnimation);
+        }
+        requestAnimationFrame(moveObstacle);
+      }
+    }
+
+    function restartGame() {
+      isGameOver = false;
+      gameOver.style.display = 'none';
+      restartBtn.style.display = 'none';
+      dino.style.bottom = '0';
+      obstacle.style.left = '600px';
+      obstacleSpeed = 4; // Resetta la velocità dell'ostacolo
+      startGame();
+    }
+
+    startGame(); // Avvia il gioco quando la pagina viene caricata
+  </script>
+</body>
+</html>
