@@ -1,4 +1,1 @@
-# ProgettoPCTO
-
-Progetto scelto: GESTIONE DELLE FINANZE PERSONALI
 
